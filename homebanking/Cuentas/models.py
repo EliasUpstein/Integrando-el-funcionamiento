@@ -12,20 +12,27 @@ class Cuenta(models.Model):
     account_id = models.AutoField(primary_key=True)
     balance = models.IntegerField()
     iban = models.TextField()
-    account_type = models.TextField(blank=True, null=True)
-    customer = models.ForeignKey(Cliente, models.DO_NOTHING, blank=True, null=True)
+    account_type = models.TextField()
+    customer = models.ForeignKey(Cliente, on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
-        managed = False
         db_table = 'cuenta'
+        verbose_name = "Cuenta"
+        verbose_name_plural = "Cuentas"
+        ordering = ["-account_id"] #este campo indica que 
+
+    def __str__(self): 
+        return str(f"Tipo de cuenta: {self.account_type} del usuario con DNI: {self.customer.customer_dni}")
 
 class Movimientos(models.Model):
     transaction_id = models.AutoField(primary_key=True)
-    account_id = models.IntegerField()
     operation_tipe = models.TextField()
     amount = models.IntegerField()
     changed_at = models.TextField()
+    account_id = models.IntegerField()
 
     class Meta:
-        managed = False
         db_table = 'movimientos'
+        verbose_name = "Movimiento"
+        verbose_name_plural = "Movimientos"
+        ordering = ["transaction_id"] #este campo indica que 
