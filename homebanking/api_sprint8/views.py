@@ -37,72 +37,121 @@ from api_sprint8.serializers import MarcaTarjetaSerializer
 
 from Cuentas.models import TipoCuenta
 from api_sprint8.serializers import TipoCuentaSerializer
+
+from rest_framework import viewsets
 # Create your views here.
 
-class ClienteDetail(APIView):
+class ClienteViewSet(viewsets.ModelViewSet):
+    queryset = Cliente.objects.all().order_by('customer_id') 
+    serializer_class = ClienteSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    def get(self, request, pk):
+    
+    def retrieve(self, request, pk=None):
         cliente = Cliente.objects.filter(pk=pk).first()
-        serializer = ClienteSerializer(cliente, context={'request': request})
         if cliente:
-            return Response(serializer.data, status=status.HTTP_200_OK) 
-        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+            return Response(self.serializer_class(cliente).data, status=status.HTTP_200_OK) 
+        return Response(self.serializer_class(cliente).errors, status=status.HTTP_404_NOT_FOUND)
 
-class ClienteList(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    def get(self, request): 
-        clientes = Cliente.objects.all().order_by('customer_id') 
-        serializer = ClienteSerializer(clientes, many=True, context={'request': request}) 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+# class ClienteDetail(APIView):
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+#     def get(self, request, pk):
+#         cliente = Cliente.objects.filter(pk=pk).first()
+#         serializer = ClienteSerializer(cliente, context={'request': request})
+#         if cliente:
+#             return Response(serializer.data, status=status.HTTP_200_OK) 
+#         return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+
+# class ClienteList(APIView):
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+#     def get(self, request): 
+#         clientes = Cliente.objects.all().order_by('customer_id') 
+#         serializer = ClienteSerializer(clientes, many=True, context={'request': request}) 
+#         return Response(serializer.data, status=status.HTTP_200_OK)
     
-# Está filtrando por el account id y no por el customer id
-class CuentaDetail(APIView):
+class CuentaViewSet(viewsets.ModelViewSet):
+    queryset = Cuenta.objects.all().order_by('customer_id') 
+    serializer_class = CuentaSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    def get(self, request, pk):
+    
+    def retrieve(self, request, pk=None):
         cuenta = Cuenta.objects.filter(pk=pk).first()
-        serializer = CuentaSerializer(cuenta, context={'request': request})
         if cuenta:
-            return Response(serializer.data, status=status.HTTP_200_OK) 
-        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
-    
-class CuentaList(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    def get(self, request): 
-        cuentas = Cuenta.objects.all().order_by('customer_id') 
-        serializer = CuentaSerializer(cuentas, many=True, context={'request': request}) 
-        return Response(serializer.data, status=status.HTTP_200_OK)    
-    
-class PrestamoDetail(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    def get(self, request, pk):
-        prestamo = Prestamo.objects.filter(pk=pk).first()
-        serializer = PrestamoSerializer(prestamo, context={'request': request})
-        if prestamo:
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
-    
-    def delete(self, request, pk): 
-        prestamo = Prestamo.objects.filter(pk=pk).first() 
-        if prestamo: 
-            serializer = PrestamoSerializer(prestamo, context={'request': request}) 
-            prestamo.delete() 
-            return Response(serializer.data, status=status.HTTP_200_OK) 
-        return Response(status=status.HTTP_404_NOT_FOUND)
-    
+            return Response(self.serializer_class(cuenta).data, status=status.HTTP_200_OK) 
+        return Response(self.serializer_class(cuenta).errors, status=status.HTTP_404_NOT_FOUND)
 
-class PrestamoList(APIView):
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    def get(self, request): 
-        prestamos = Prestamo.objects.all().order_by('loan_id') 
-        serializer = PrestamoSerializer(prestamos, many=True, context={'request': request}) 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+# class CuentaDetail(APIView):
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+#     def get(self, request, pk):
+#         cuenta = Cuenta.objects.filter(pk=pk).first()
+#         serializer = CuentaSerializer(cuenta, context={'request': request})
+#         if cuenta:
+#             return Response(serializer.data, status=status.HTTP_200_OK) 
+#         return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
     
-    def post(self, request, format=None): 
+# class CuentaList(APIView):
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+#     def get(self, request): 
+#         cuentas = Cuenta.objects.all().order_by('customer_id') 
+#         serializer = CuentaSerializer(cuentas, many=True, context={'request': request}) 
+#         return Response(serializer.data, status=status.HTTP_200_OK)    
+
+class PrestamoViewSet(viewsets.ModelViewSet):
+    queryset = Prestamo.objects.all().order_by('loan_id') 
+    serializer_class = PrestamoSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def retrieve(self, request, pk=None):
+        prestamo = Prestamo.objects.filter(pk=pk).first()
+        if prestamo:
+            return Response(self.serializer_class(prestamo).data, status=status.HTTP_200_OK) 
+        return Response(self.serializer_class(prestamo).errors, status=status.HTTP_404_NOT_FOUND)
+
+    def destroy(self, request, pk=None):
+        prestamo = Prestamo.objects.filter(pk=pk).first()
+        if prestamo: 
+            # serializer = PrestamoSerializer(prestamo, context={'request': request}) 
+            # prestamo.delete() 
+            # return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(self.serializer_class(prestamo).delete(), status=status.HTTP_200_OK) 
+    
+    def create(self, request):
         serializer = PrestamoSerializer(data=request.data, context={'request': request}) 
         if serializer.is_valid(): 
             serializer.save() 
             return Response(serializer.data, status=status.HTTP_201_CREATED) 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# class PrestamoDetail(APIView):
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+#     def get(self, request, pk):
+#         prestamo = Prestamo.objects.filter(pk=pk).first()
+#         serializer = PrestamoSerializer(prestamo, context={'request': request})
+#         if prestamo:
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
+    
+#     def delete(self, request, pk): 
+#         prestamo = Prestamo.objects.filter(pk=pk).first() 
+#         if prestamo: 
+#             serializer = PrestamoSerializer(prestamo, context={'request': request}) 
+#             prestamo.delete() 
+#             return Response(serializer.data, status=status.HTTP_200_OK) 
+#         return Response(status=status.HTTP_404_NOT_FOUND)
+    
+
+# class PrestamoList(APIView):
+#     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+#     def get(self, request): 
+#         prestamos = Prestamo.objects.all().order_by('loan_id') 
+#         serializer = PrestamoSerializer(prestamos, many=True, context={'request': request}) 
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+#     def post(self, request, format=None): 
+#         serializer = PrestamoSerializer(data=request.data, context={'request': request}) 
+#         if serializer.is_valid(): 
+#             serializer.save() 
+#             return Response(serializer.data, status=status.HTTP_201_CREATED) 
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class PrestamoSucursalList(APIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
