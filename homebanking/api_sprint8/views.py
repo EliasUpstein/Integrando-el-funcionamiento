@@ -179,7 +179,7 @@ class PrestamoSucursalViewSet(viewsets.ModelViewSet):
 #         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class TarjetasViewSet(viewsets.ModelViewSet):
-    queryset = Tarjeta.objects.filter(customer_id=pk).order_by('card_id') 
+    # queryset = Tarjeta.objects.filter(customer_id=pk).order_by('card_id') 
     serializer_class = TarjetaSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     
